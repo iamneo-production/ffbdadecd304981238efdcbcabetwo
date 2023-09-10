@@ -1,111 +1,84 @@
-let btnRef = document.querySelectorAll(".button-option");
-let popupRef = document.querySelector(".popup");
-let newgameBtn = document.getElementById("new-game");
-let restartBtn = document.getElementById("restart");
-let msgRef = document.getElementById("message");
-//Winning Pattern Array
-let winningPattern = [
-  [0, 1, 2],
-  [0, 3, 6],
-  [2, 5, 8],
-  [6, 7, 8],
-  [3, 4, 5],
-  [1, 4, 7],
-  [0, 4, 8],
-  [2, 4, 6],
-];
-//Player 'X' plays first
-let xTurn = true;
-let count = 0;
+// JavaScript code for the Tic Tac Toe game logic
+document.addEventListener("DOMContentLoaded", function () {
+  const buttons = document.querySelectorAll(".btn");
+  const resultContainer = document.querySelector(".result-container");
+  const resultText = document.querySelector(".result");
+  const resetBtn = document.getElementById("reset-btn");
 
-//Disable All Buttons
-const disableButtons = () => {
-  btnRef.forEach((element) => (element.disabled = true));
-  //enable popup
-  popupRef.classList.remove("hide");
-};
+  let currentPlayer = "X";
+  let moves = 0;
+  let gameOver = false;
 
-//Enable all buttons (For New Game and Restart)
-const enableButtons = () => {
-  btnRef.forEach((element) => {
-    element.innerText = "";
-    element.disabled = false;
-  });
-  //disable popup
-  popupRef.classList.add("hide");
-};
-
-//This function is executed when a player wins
-const winFunction = (letter) => {
-  disableButtons();
-  if (letter == "X") {
-    msgRef.innerHTML = "&#x1F389; <br> 'X' Wins";
-  } else {
-    msgRef.innerHTML = "&#x1F389; <br> 'O' Wins";
-  }
-};
-
-//Function for draw
-const drawFunction = () => {
-  disableButtons();
-  msgRef.innerHTML = "&#x1F60E; <br> It's a Draw";
-};
-
-//New Game
-newgameBtn.addEventListener("click", () => {
-  count = 0;
-  enableButtons();
-});
-restartBtn.addEventListener("click", () => {
-  count = 0;
-  enableButtons();
-});
-
-//Win Logic
-const winChecker = () => {
-  //Loop through all win patterns
-  for (let i of winningPattern) {
-    let [element1, element2, element3] = [
-      btnRef[i[0]].innerText,
-      btnRef[i[1]].innerText,
-      btnRef[i[2]].innerText,
+  // Function to check if a player has won
+  function checkWin() {
+    const winningCombos = [
+      [0, 1, 2],
+      [3, 4, 5],
+      [6, 7, 8],
+      [0, 3, 6],
+      [1, 4, 7],
+      [2, 5, 8],
+      [0, 4, 8],
+      [2, 4, 6]
     ];
-    //Check if elements are filled
-    //If 3 empty elements are same and would give win as would
-    if (element1 != "" && (element2 != "") & (element3 != "")) {
-      if (element1 == element2 && element2 == element3) {
-        //If all 3 buttons have same values then pass the value to winFunction
-        winFunction(element1);
+
+    for (const combo of winningCombos) {
+      const [a, b, c] = combo;
+      if (buttons[a].value && buttons[a].value === buttons[b].value && buttons[a].value === buttons[c].value) {
+        return buttons[a].value;
+      }
+    }
+
+    if (moves === 9) {
+      return "draw";
+    }
+
+    return null;
+  }
+
+  // Function to handle a player's move
+  function handleMove(button) {
+    if (!button.value && !gameOver) {
+      button.value = currentPlayer;
+      button.disabled = true;
+      moves++;
+      const winner = checkWin();
+      if (winner) {
+        gameOver = true;
+        if (winner === "draw") {
+          resultText.textContent = "It's a Draw!";
+        } else {
+          resultText.textContent = `Player ${winner} Wins!`;
+        }
+        resetBtn.disabled = false;
+      } else {
+        currentPlayer = currentPlayer === "X" ? "O" : "X";
+        resultText.textContent = `Player ${currentPlayer} Turn`;
       }
     }
   }
-};
 
-//Display X/O on click
-btnRef.forEach((element) => {
-  element.addEventListener("click", () => {
-    if (xTurn) {
-      xTurn = false;
-      //Display X
-      element.innerText = "X";
-      element.disabled = true;
-    } else {
-      xTurn = true;
-      //Display Y
-      element.innerText = "O";
-      element.disabled = true;
-    }
-    //Increment count on each click
-    count += 1;
-    if (count == 9) {
-      drawFunction();
-    }
-    //Check for win on every click
-    winChecker();
+  // Event listener for button clicks
+  buttons.forEach((button) => {
+    button.addEventListener("click", () => {
+      handleMove(button);
+    });
+  });
+
+  // Event listener for the Reset button
+  resetBtn.addEventListener("click", () => {
+    buttons.forEach((button) => {
+      button.value = "";
+      button.disabled = false;
+    });
+    resultText.textContent = "Player X Turn";
+    currentPlayer = "X";
+    moves = 0;
+    gameOver = false;
+    resetBtn.disabled = true;
   });
 });
-//Enable Buttons and disable popup on page load
-window.onload = enableButtons;
+
 
 // // Function to handle player moves
 // const ticTacToe = (element, index) => {
